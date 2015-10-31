@@ -67,7 +67,6 @@ def test2():
         }
     }
 
-
     index.navtree_default = {
         NavCategory(nid=33, hid=2, primary=True): {}
     }
