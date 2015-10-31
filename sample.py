@@ -3,20 +3,13 @@ from navcategory import NavTree, NavCategory
 from offer import Offer
 from hypercategory import HyperCategory
 from region import Region
+from model import Model, ModelStat
 
 class GLParam(object):
     def __init__(self, id, value, type='numeric'):
         self.id = id
         self.value = value
         self.type = type
-
-
-class RegionalModel(object):
-    def __init__(self, hyper, regions, price_min=5, price_max=5):
-        self.hyper = hyper
-        self.price_min = price_min
-        self.price_max = price_max
-        self.regions = regions
 
 def test1():
     with FlexibleIndex() as data:
@@ -75,8 +68,8 @@ def test2():
         Offer(title='yura', ts=3)
     ]
 
-    index.regional_models = [
-        RegionalModel(
+    index.model_stats = [
+        ModelStat(
             hyper=111,
             regions=[213, 225],
             price_min=234,
@@ -92,10 +85,24 @@ def test2():
 
     # if price is less than minimal for model by statistics -- error
     index.offers += [Offer(cpa=True, hyper=123, shop=111, price=123, hid=333) for _ in xrange(5)]
+    index.commit()
+
+def test3():
+    index = FlexibleIndex()
+    index.offers = [
+        Offer(hyper=1, price=100, price_old=200),
+        Offer(hyper=1, price=110, price_old=140),
+        Offer(hyper=1, price=200, price_old=220),
+        Offer(hyper=1, price=300, price_old=320)
+    ]
+
+    index.model_stats = [
+        ModelStat(hyper=1, price_min=100, price_max=200, price_med=150)
+    ]
 
     index.commit()
 
-
 if __name__ == '__main__':
     # test1()
-    test2()
+    # test2()
+    test3()

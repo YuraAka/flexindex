@@ -38,10 +38,6 @@ class FlexibleIndex(object):
         return self.__navforest.default_tree
 
     @property
-    def model_stats(self):
-        return None
-
-    @property
     def bids(self):
         return self.__bids
 
@@ -77,11 +73,11 @@ class FlexibleIndex(object):
         self.__categories = HyperCategoryTree()
         self.__offers = []
         self.__navforest = NavForest()
-        self.__model_stats = None
         self.__bids = RawDataFallback()
         self.__regions = RegionTree()
 
-        self.regional_models = []
+        self.models = []
+        self.model_stats = []
 
     def __enter__(self):
         return self
@@ -95,11 +91,26 @@ class FlexibleIndex(object):
     def commit(self):
         print('part/offers.txt:')
         for offer in self.offers:
-            offer.save(indexfile=sys.stdout, glscfile=sys.stdout, categs=self.categories)
+            offer.save(
+                index=sys.stdout,
+                glsc=sys.stdout,
+                categories=self.categories,
+                models=self.models
+            )
+
+        print('\npart/models.txt')
+        for model in self.models:
+            model.save(out=sys.stdout)
 
         print('\nCategories.xml:')
         self.categories.save(self.navforest, out=sys.stdout)
+
         print('\nnavigation_info.xml')
         self.navforest.save(out=sys.stdout)
+
         print('\nbids.txt')
         self.bids.save(out=sys.stdout)
+
+        print('\nModelRegionalStats')
+        for stat in self.model_stats:
+            stat.save(out=sys.stdout)

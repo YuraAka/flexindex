@@ -30,10 +30,10 @@ class HyperCategoryTree(Tree):
         # load raw file, restrict autogeneration
         pass
 
-    def autogen_by_hid(self, hid):
+    def add_one(self, hid):
         if hid in self._index:
             return
-        self.add_children({HyperCategory(hid=hid, name='HID-{0}'.format(hid)): {}})
+        self.add_children({HyperCategory(hid=hid): {}})
 
     def get_parents(self, hid):
         while hid:

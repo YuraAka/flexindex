@@ -1,41 +1,61 @@
 from autogen import Autogen
+from model import Model
 
 __author__ = 'Yura'
 
 class Offer(object):
-    def __init__(self, **kwargs):
-        self.hid = kwargs.get('hid')
-        self.bid = kwargs.get('bid', 0)
-        self.ts = kwargs.get('ts')
-        self.title = kwargs.get('title', 'default-title')
-        self.descr = kwargs.get('descr', 'default-descr')
-        self.cmagic = kwargs.get('cmagic')
-        self.glparams = kwargs.get('glparams', [])
-        self.cpa = kwargs.get('cpa', False)
-        self.hyper = kwargs.get('hyper', None)
+    def __init__(
+        self,
+        hid=None,
+        bid=0,
+        ts=None,
+        title='Apple iPhone',
+        descr='Apple iPhone 128Gb with Retina display',
+        cmagic=None,
+        glparams=[],
+        cpa=False,
+        hyper=None,
+        price=100,
+        price_old=100
+    ):
+        self.hid = hid
+        self.bid = bid
+        self.ts = ts
+        self.title = title
+        self.descr = descr
+        self.cmagic = cmagic
+        self.glparams = glparams
+        self.cpa = cpa
+        self.hyper = hyper
+        self.price = price
+        self.price_old = price_old
 
-        #manualgen register
         Autogen.use('ts', self.ts)
         Autogen.use('cmagic', self.cmagic)
 
-    def save(self, indexfile, glscfile, categs):
-        #autogen
+    def save(self, index, glsc, categories, models):
         self.ts = self.ts if self.ts else Autogen.get('ts')
         self.cmagic = self.cmagic if self.cmagic else Autogen.get('cmagic')
         self.hid = self.hid if self.hid else Autogen.default_hid
 
-        indexfile.write('ts:G={0}\n'.format(self.ts))
-        indexfile.write('cmagic:G={0}\n'.format(self.cmagic))
-        indexfile.write('_Title={0}\n'.format(self.title))
-        indexfile.write('Descrutf8={0}\n'.format(self.descr))
-        indexfile.write('hidd:G={0}\n'.format(self.hid))
-        categs.autogen_by_hid(self.hid)
-        for p in categs.get_parents(self.hid):
-            indexfile.write('hyper_categ_id:S={0}\n'.format(p))
+        index.write('ts:G={0}\n'.format(self.ts))
+        index.write('cmagic:G={0}\n'.format(self.cmagic))
+        index.write('_Title={0}\n'.format(self.title))
+        index.write('Descrutf8={0}\n'.format(self.descr))
+        index.write('hidd:G={0}\n'.format(self.hid))
+
+        categories.add_one(self.hid)
+        for p in categories.get_parents(self.hid):
+            index.write('hyper_categ_id:S={0}\n'.format(p))
 
         if self.hyper:
-            indexfile.write('hyper:G={0}\n'.format(self.hyper))
-        indexfile.write('\n')
+            if self.hyper not in models:
+                models.append(Model(hyper=self.hyper))
+            index.write('hyper:G={0}\n'.format(self.hyper))
+
+        index.write('\n')
 
         for p in self.glparams:
-            glscfile.write('{hid}:{param}:{value}\n'.format(hid=self.hid, param=p.id, value=str(p.value)))
+            glsc.write('{hid}:{param}:{value}\n'.format(hid=self.hid, param=p.id, value=str(p.value)))
+
+        #write prices

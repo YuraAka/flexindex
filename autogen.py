@@ -48,3 +48,4 @@ class Autogen(object):
     root_hid = 90604
     default_navtree = 12345
     root_rid = 1111
+    default_region = 213
