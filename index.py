@@ -5,29 +5,14 @@ from navcategory import NavForest
 from raw import RawDataFallback
 
 __author__ = 'Yura'
+
 """
-autogen:
-offer -> hyper-cats
-offer -> shops
-offer -> glparams
-offer -> glmbo
-
-hyper-cats -> nav-cats
-
-manualgen:
-hyper-cats => default-cat, root-cat
-
-
 RULE OF THUMB: ALL AUTOGENERATION IS IN SAVE-METHODS, NOT EARLIER
 """
 class FlexibleIndex(object):
     @property
     def categories(self):
         return self.__categories
-
-    @property
-    def offers(self):
-        return self.__offers
 
     @property
     def navforest(self):
@@ -49,10 +34,6 @@ class FlexibleIndex(object):
     def categories(self, value):
         self.categories.add_children(value)
 
-    @offers.setter
-    def offers(self, value):
-        self.__offers = value
-
     @navforest.setter
     def navforest(self, value):
         self.__navforest.add_trees(value)
@@ -71,11 +52,11 @@ class FlexibleIndex(object):
 
     def __init__(self):
         self.__categories = HyperCategoryTree()
-        self.__offers = []
         self.__navforest = NavForest()
         self.__bids = RawDataFallback()
         self.__regions = RegionTree()
 
+        self.offers = []
         self.models = []
         self.model_stats = []
 

@@ -15,8 +15,9 @@ class Offer(object):
         glparams=[],
         cpa=False,
         hyper=None,
-        price=100,
-        price_old=100
+        price=None,
+        price_old=None,
+        discount=None
     ):
         self.hid = hid
         self.bid = bid
@@ -27,11 +28,21 @@ class Offer(object):
         self.glparams = glparams
         self.cpa = cpa
         self.hyper = hyper
-        self.price = price
-        self.price_old = price_old
+        self.price, self.price_old, self.discount = Offer.__calc_prices(price, price_old, discount)
 
         Autogen.use('ts', self.ts)
         Autogen.use('cmagic', self.cmagic)
+
+    @staticmethod
+    def __calc_prices(price, old, discount):
+        default_price = 100
+        if not price and not old and discount: return default_price, default_price*discount/100, discount
+        if not price and old and not discount: return default_price, old, (old - default_price) / old
+        if not price and old and discount: return old-old*discount/100, old, discount
+        if price and not old and not discount: return price, price, 0
+        if price and not old and discount: return price, price + price * discount/100, discount
+        if price and old and not discount: return price, old, (old - price) / old
+        raise RuntimeError('Cannot use price_old and discount simultaneously. Use on of it.')
 
     def save(self, index, glsc, categories, models):
         self.ts = self.ts if self.ts else Autogen.get('ts')
@@ -53,9 +64,12 @@ class Offer(object):
                 models.append(Model(hyper=self.hyper))
             index.write('hyper:G={0}\n'.format(self.hyper))
 
+        index.write('price={0}\n'.format(self.price))
+        index.write('price_old={0}\n'.format(self.price_old))
+        index.write('discount={0}\n'.format(self.discount))
         index.write('\n')
 
         for p in self.glparams:
             glsc.write('{hid}:{param}:{value}\n'.format(hid=self.hid, param=p.id, value=str(p.value)))
 
-        #write prices
+

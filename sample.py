@@ -4,12 +4,7 @@ from offer import Offer
 from hypercategory import HyperCategory
 from region import Region
 from model import Model, ModelStat
-
-class GLParam(object):
-    def __init__(self, id, value, type='numeric'):
-        self.id = id
-        self.value = value
-        self.type = type
+from glparam import GLParam
 
 def test1():
     with FlexibleIndex() as data:
@@ -83,21 +78,21 @@ def test2():
         }
     }
 
-    # if price is less than minimal for model by statistics -- error
     index.offers += [Offer(cpa=True, hyper=123, shop=111, price=123, hid=333) for _ in xrange(5)]
     index.commit()
 
 def test3():
     index = FlexibleIndex()
-    index.offers = [
-        Offer(hyper=1, price=100, price_old=200),
-        Offer(hyper=1, price=110, price_old=140),
-        Offer(hyper=1, price=200, price_old=220),
-        Offer(hyper=1, price=300, price_old=320)
-    ]
 
     index.model_stats = [
-        ModelStat(hyper=1, price_min=100, price_max=200, price_med=150)
+        ModelStat(hyper=1, price_min=100, price_max=300, price_med=150)
+    ]
+
+    index.offers = [
+        Offer(cpa=True, hyper=1, price=100, discount=20),
+        Offer(cpa=True, hyper=1, price_old=140, discount=20),
+        Offer(cpa=True, hyper=1, price=200, discount=20),
+        Offer(cpa=True, hyper=1, price=300, discount=20)
     ]
 
     index.commit()
