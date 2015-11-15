@@ -1,13 +1,33 @@
-from index import FlexibleIndex
+from index import IndexFrontend
 from navcategory import NavTree, NavCategory
 from offer import Offer
 from hypercategory import HyperCategory
 from region import Region
 from model import Model, ModelStat
 from glparam import GLParam
+from report import Report
+import unittest
+
+
+class FlexTestCase(unittest.TestCase):
+    def setUp(self):
+        self.index = IndexFrontend()
+        self.report = Report()
+
+    def tearDown(self):
+        self.report.stop()
+        self.index.remove()
+
+class MyTestCase(FlexTestCase):
+    def setUp(self):
+
+        pass
+
+    def test_one(self):
+        pass
 
 def test1():
-    with FlexibleIndex() as data:
+    with IndexFrontend() as data:
         data.navforest = {
             NavTree(id=123, nid=123): {
                 NavCategory(nid=345): {}
@@ -47,7 +67,7 @@ def test1():
 
 
 def test2():
-    index = FlexibleIndex()
+    index = IndexFrontend()
 
     index.categories = {
         HyperCategory(hid=1): {
@@ -82,7 +102,7 @@ def test2():
     index.commit()
 
 def test3():
-    index = FlexibleIndex()
+    index = IndexFrontend()
 
     index.model_stats = [
         ModelStat(hyper=1, price_min=100, price_max=300, price_med=150)
@@ -100,4 +120,5 @@ def test3():
 if __name__ == '__main__':
     # test1()
     # test2()
-    test3()
+    #test3()
+    unittest.main()

@@ -6,10 +6,41 @@ from raw import RawDataFallback
 
 __author__ = 'Yura'
 
-"""
-RULE OF THUMB: ALL AUTOGENERATION IS IN SAVE-METHODS, NOT EARLIER
-"""
-class FlexibleIndex(object):
+CATEGORIES_FILE = 'report-data/categories.xml'
+NAVIGATION_INFO_FILE = 'report-data/navigation_info.xml'
+OFFER_INDEX_FILE = 'index/offers.txt'
+MODEL_INDEX_FILE = 'index/models.txt'
+BIDS_FILE = 'index/bids.txt'
+MRS_FILE = 'report-data/model_regional_stats.txt'
+GLSC_FILE = 'report-data/guru_light_regional_stats.txt'
+YACA_FILE = 'report-data/YaCa.xml'
+
+def fillStub(out):
+    return out.write('I am a stub\n')
+
+
+class IndexBackend(object):
+    def __init__(self):
+        self.__user_files = set()
+        self.__required_files = {
+            CATEGORIES_FILE: fillStub,
+            NAVIGATION_INFO_FILE: fillStub,
+            YACA_FILE: fillStub
+        }
+
+    def create_file(self, name):
+        print('Creating {0}'.format(name))
+        self.__user_files.add(name)
+        return sys.stdout;
+
+    def create_stubs(self):
+        stub_files = set(k for k in self.__required_files.iterkeys()).difference(self.__user_files)
+        for name in stub_files:
+            stub = self.create_file(name)
+            self.__required_files[name](stub)
+
+
+class IndexFrontend(object):
     @property
     def categories(self):
         return self.__categories
@@ -69,29 +100,39 @@ class FlexibleIndex(object):
         self.commit()
         return self
 
+    def remove(self):
+        # remove index files
+        pass
+
     def commit(self):
-        print('part/offers.txt:')
+        # check /dev/shm accessible, if yes -- use it
+        # otherwise use /tmp dir
+        backend = IndexBackend()
+
+        offer_file = backend.create_file(OFFER_INDEX_FILE)
+        glsc_file = backend.create_file(GLSC_FILE)
+        model_file = backend.create_file(MODEL_INDEX_FILE)
+        categories_file = backend.create_file(CATEGORIES_FILE)
+        navforest_file = backend.create_file(NAVIGATION_INFO_FILE)
+        bids_file = backend.create_file(BIDS_FILE)
+        mrs_file = backend.create_file(MRS_FILE)
+
         for offer in self.offers:
             offer.save(
-                index=sys.stdout,
-                glsc=sys.stdout,
+                index=offer_file,
+                glsc=glsc_file,
                 categories=self.categories,
                 models=self.models
             )
 
-        print('\npart/models.txt')
+
         for model in self.models:
-            model.save(out=sys.stdout)
+            model.save(out=model_file)
 
-        print('\nCategories.xml:')
-        self.categories.save(self.navforest, out=sys.stdout)
-
-        print('\nnavigation_info.xml')
-        self.navforest.save(out=sys.stdout)
-
-        print('\nbids.txt')
-        self.bids.save(out=sys.stdout)
-
-        print('\nModelRegionalStats')
+        self.categories.save(self.navforest, out=categories_file)
+        self.navforest.save(out=navforest_file)
+        self.bids.save(out=bids_file)
         for stat in self.model_stats:
-            stat.save(out=sys.stdout)
+            stat.save(out=mrs_file)
+
+        backend.create_stubs()
