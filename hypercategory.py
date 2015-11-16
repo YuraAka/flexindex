@@ -4,7 +4,7 @@ from tree import Tree
 __author__ = 'Yura'
 
 class HyperCategory(object):
-    def __init__(self, hid, name=None):
+    def __init__(self, hid, name=None, children=[]):
         self.hid = hid
         self.name = name if name else 'HID-{0}'.format(hid)
         self.id = Autogen.get('tovar_id')

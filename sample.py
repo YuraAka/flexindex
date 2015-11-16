@@ -1,124 +1,65 @@
-from index import IndexFrontend
-from navcategory import NavTree, NavCategory
-from offer import Offer
-from hypercategory import HyperCategory
-from region import Region
-from model import Model, ModelStat
-from glparam import GLParam
-from report import Report
+#!/usr/bin/env python
 import unittest
+from index import IndexFrontend
+from hypercategory import HyperCategory
 
 
-class FlexTestCase(unittest.TestCase):
-    def setUp(self):
-        self.index = IndexFrontend()
-        self.report = Report()
-
-    def tearDown(self):
-        self.report.stop()
-        self.index.remove()
-
-class MyTestCase(FlexTestCase):
-    def setUp(self):
-
+class ClientBase(unittest.TestCase):
+    report = None
+    index = IndexFrontend
+    @classmethod
+    def setUpClass(cls):
+        cls.index = IndexFrontend
+        ClientBase.report = 'report'
+        cls.prepare()
         pass
 
+    @classmethod
+    def prepare(cls):
+        """
+        need to be overriden
+        """
+
+
+class ClientTests(ClientBase):
     def test_one(self):
-        pass
+        self.index.categories = [
+            HyperCategory(123, children=[
+                HyperCategory(222, children=[
+                    HyperCategory(333),
+                    HyperCategory(444)
+                ]),
+                HyperCategory(345)
+            ]
+        )]
 
-def test1():
-    with IndexFrontend() as data:
-        data.navforest = {
-            NavTree(id=123, nid=123): {
-                NavCategory(nid=345): {}
-            }
-        }
+        print('test one')
+        print(self.report)
+        #self.report
+        #self.showlog
+        #self.qupdate
 
-        data.navtree_default = {
-            NavCategory(nid=111): {},
-            NavCategory(nid=222): {
-                NavCategory(nid=333): {},
-                NavCategory(nid=2, link={'how': 'aprice', 'hid': 123}): {},
-                NavCategory(nid=3, hid=222, primary=True): {}
-            }
-        }
-
-        data.offers = [
-            Offer(title='mom', hid=12),
-            Offer(
-                hid=111,
-                title='yura',
-                glparams=[
-                    GLParam(id=111, value=False, type='bool'),
-                    GLParam(id=222, value=5, type='enum')
-                ]
-            )
-        ]
-
-        data.categories = {
-            HyperCategory(hid=123, name='yura'): {
-                HyperCategory(hid=456): {},
-                HyperCategory(hid=555): {},
-                HyperCategory(hid=222, name='leaf'): {
-                    HyperCategory(hid=111): {}
-                }
-            }
-        }
+    def test_two(self):
+        print('test two')
+        print(self.report)
 
 
-def test2():
-    index = IndexFrontend()
+def clientmain():
+    runner = unittest.TextTestRunner()
+    test = ClientTests()
+    runner.run(test)
+    #loader = unittest.TestLoader()
+    #tests = loader.loadTestsFromModule(sys.modules[__name__])
 
-    index.categories = {
-        HyperCategory(hid=1): {
-            HyperCategory(hid=2): {}
-        }
-    }
-
-    index.navtree_default = {
-        NavCategory(nid=33, hid=2, primary=True): {}
-    }
-
-    index.offers = [
-        Offer(title='yura', ts=3)
-    ]
-
-    index.model_stats = [
-        ModelStat(
-            hyper=111,
-            regions=[213, 225],
-            price_min=234,
-            price_max=123
-        )
-    ]
-
-    index.regions = {
-        Region(name='Moscow', rid=1) : {
-            Region(name='Lubertsy', rid=2) : {}
-        }
-    }
-
-    index.offers += [Offer(cpa=True, hyper=123, shop=111, price=123, hid=333) for _ in xrange(5)]
-    index.commit()
-
-def test3():
-    index = IndexFrontend()
-
-    index.model_stats = [
-        ModelStat(hyper=1, price_min=100, price_max=300, price_med=150)
-    ]
-
-    index.offers = [
-        Offer(cpa=True, hyper=1, price=100, discount=20),
-        Offer(cpa=True, hyper=1, price_old=140, discount=20),
-        Offer(cpa=True, hyper=1, price=200, discount=20),
-        Offer(cpa=True, hyper=1, price=300, discount=20)
-    ]
-
-    index.commit()
 
 if __name__ == '__main__':
-    # test1()
-    # test2()
-    #test3()
+    #clientmain()
     unittest.main()
+    '''
+    runner = unittest.TextTestRunner()
+    loader = unittest.TestLoader()
+    tests = loader.loadTestsFromModule(sys.modules[__name__])
+    with MyTestSuite() as suite:
+        suite.addTests(tests)
+        runner.run(suite)
+    '''
